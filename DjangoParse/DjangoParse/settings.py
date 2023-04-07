@@ -77,14 +77,13 @@ WSGI_APPLICATION = 'DjangoParse.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': "test_bd_reestr_test",
+        'NAME': "ParseDB",
         'USER': "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "kastor.tsnigri.ru",
+        "PASSWORD": "danila2001",
+        "HOST": "localhost",
         "PORT": "5432",
-    },
+    }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

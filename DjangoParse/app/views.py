@@ -12,6 +12,7 @@ from .models import Purchase, Detail
 
 
 class MyView(View):
+    
     def get(self, request):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)

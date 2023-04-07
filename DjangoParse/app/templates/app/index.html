@@ -8,8 +8,10 @@ index
 {% endblock%}
 
 {% block body %}
+<h2>Данные</h2>
+<br></br>
 {% for el in data %}
-{{el}}
+<br>№ {{el.purchase_id}}  Расчёт {{el.calculation}}</br>
 {% endfor %}
 
 {% endblock%}

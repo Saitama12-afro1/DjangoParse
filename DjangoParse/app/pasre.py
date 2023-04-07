@@ -11,16 +11,17 @@ from .controller import Controller
 
 
 class Parse:
-    __first_url = "http://zakupki.gov.ru/epz/order/extendedsearch/results.html?searchString=&morphology=on&search-filter=%D0%94%D0%B0%D1%82%D0%B5+%D0%BE%D0%B1%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F&pageNumber=1&sortDirection=false&recordsPerPage=_10&showLotsInfoHidden=false&savedSearchSettingsIdHidden=&sortBy=UPDATE_DATE&fz44=on&fz223=on&af=on&ca=on&pc=on&pa=on&placingWayList=&selectedLaws=&priceFromGeneral=&priceFromGWS=&priceFromUnitGWS=&priceToGeneral=&priceToGWS=&priceToUnitGWS=&currencyIdGeneral=-1&publishDateFrom=&publishDateTo=&applSubmissionCloseDateFrom=&applSubmissionCloseDateTo=&customerIdOrg=&customerFz94id=&customerTitle=&okpd2Ids=&okpd2IdsCodes="
+    __first_url = "http://zakupki.gov.ru/epz/order/extendedsearch/results.html"
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
     
     
     async def get_page(self, url, page):
+        params = [("pageNumber", str(page)),]
         key = f'url{page}'
         html = cache.get(key)
         if not html:
             async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=60), trust_env=True) as session:
-                async with session.get(url, headers=self.headers, ssl=False) as response:
+                async with session.get(url, headers=self.headers, ssl=False, params = params) as response:
                     html = await response.text()
                     await asyncio.sleep(3)
             cache.add(key, value=html)
@@ -28,7 +29,7 @@ class Parse:
         return html
     
     
-    async def get_soup_object(self, url, page = 0):
+    async def get_soup_object(self, url, page = 1):
         html = await self.get_page(url, page)
         return  BeautifulSoup(html, 'lxml')
     
@@ -46,7 +47,6 @@ class Parse:
         
         cards = soup.find_all("div", {"class": "row no-gutters registry-entry__form mr-0"})
         result_array = []
-        # print(page, url)
         controller = Controller()
         
         for card in cards:   
@@ -58,10 +58,10 @@ class Parse:
                 result_array.append((number,
                                 start_price))
             except AttributeError:
+                start_price = 0
                 result_array.append((re.search(r'[0-9]+', number).group(0),
                                 0))    
             await controller.create(number, start_price)
-        print("apge" + str(page))
 
            
             
@@ -70,8 +70,10 @@ class Parse:
     async def main(self):
         tasks = []
         pagination = await self.get_pagination()
-        for i in range(1, 4):
-            url = f"http://zakupki.gov.ru/epz/order/extendedsearch/results.html?searchString=&morphology=on&search-filter=%D0%94%D0%B0%D1%82%D0%B5+%D0%BE%D0%B1%D0%BD%D0%BE%D0%B2%D0%BB%D0%B5%D0%BD%D0%B8%D1%8F&pageNumber={i}&sortDirection=false&recordsPerPage=_10&showLotsInfoHidden=false&savedSearchSettingsIdHidden=&sortBy=UPDATE_DATE&fz44=on&fz223=on&af=on&ca=on&pc=on&pa=on&placingWayList=&selectedLaws=&priceFromGeneral=&priceFromGWS=&priceFromUnitGWS=&priceToGeneral=&priceToGWS=&priceToUnitGWS=&currencyIdGeneral=-1&publishDateFrom=&publishDateTo=&applSubmissionCloseDateFrom=&applSubmissionCloseDateTo=&customerIdOrg=&customerFz94id=&customerTitle=&okpd2Ids=&okpd2IdsCodes="
+        print(type(pagination))
+        print(pagination)
+        for i in range(1, 70):
+            url = f"http://zakupki.gov.ru/epz/order/extendedsearch/results.html"
             tasks.append(asyncio.create_task(self.parse(url, i)))
         results = await asyncio.gather(*tasks)
         return results
