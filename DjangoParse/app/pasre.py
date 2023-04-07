@@ -11,7 +11,7 @@ from .controller import Controller
 
 
 class Parse:
-    __first_url = "http://zakupki.gov.ru/epz/order/extendedsearch/results.html"
+    __first_url = "https://zakupki.gov.ru/epz/order/extendedsearch/results.html"
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
     
     
@@ -70,10 +70,8 @@ class Parse:
     async def main(self):
         tasks = []
         pagination = await self.get_pagination()
-        print(type(pagination))
-        print(pagination)
         for i in range(1, 70):
-            url = f"http://zakupki.gov.ru/epz/order/extendedsearch/results.html"
+            url = f"https://zakupki.gov.ru/epz/order/extendedsearch/results.html"
             tasks.append(asyncio.create_task(self.parse(url, i)))
         results = await asyncio.gather(*tasks)
         return results
