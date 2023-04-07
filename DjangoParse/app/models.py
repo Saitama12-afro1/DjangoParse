@@ -31,7 +31,7 @@ class Detail(models.Model):
         db_table = "details"
 
     def __str__(self):
-        return self.name
+        return f"{self.purchase_id} {self.calculation}"
 
     
         

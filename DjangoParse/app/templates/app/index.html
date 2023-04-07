@@ -1,0 +1,15 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block script %}
+
+{% endblock %}
+{% block title %}
+index
+{% endblock%}
+
+{% block body %}
+{% for el in data %}
+{{el}}
+{% endfor %}
+
+{% endblock%}
