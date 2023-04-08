@@ -12,18 +12,19 @@ from .controller import Controller
 
 class Parse:
     __first_url = "https://zakupki.gov.ru/epz/order/extendedsearch/results.html"
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
+    __headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
     
     
     async def get_page(self, url, page):
+        conn = aiohttp.TCPConnector(limit_per_host=1)
         params = [("pageNumber", str(page)),]
         key = f'url{page}'
         html = cache.get(key)
         if not html:
-            async with aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=60), trust_env=True) as session:
-                async with session.get(url, headers=self.headers, ssl=False, params = params) as response:
+            async with aiohttp.ClientSession(connector=conn,timeout=aiohttp.ClientTimeout(total=60)) as session:
+                async with session.get(url, headers=self.__headers, ssl=True, params = params) as response:
                     html = await response.text()
-                    await asyncio.sleep(3)
+
             cache.add(key, value=html)
             
         return html
@@ -55,22 +56,17 @@ class Parse:
             try:
                 start_price = card.find("div", {"class": "price-block__value"}).text# перевести в float
                 start_price = float(re.match(r'[0-9\s]+\,[0-9]+',start_price).group(0).replace("\xa0", "").replace(",", "."))
-                result_array.append((number,
-                                start_price))
+                result_array.append((number,start_price))
             except AttributeError:
                 start_price = 0
-                result_array.append((re.search(r'[0-9]+', number).group(0),
-                                0))    
-            await controller.create(number, start_price)
-
-           
-            
+                result_array.append((re.search(r'[0-9]+', number).group(0),0))    
+            await controller.create(number, start_price)           
         return result_array
 
     async def main(self):
         tasks = []
         pagination = await self.get_pagination()
-        for i in range(1, 70):
+        for i in range(1, pagination):
             url = f"https://zakupki.gov.ru/epz/order/extendedsearch/results.html"
             tasks.append(asyncio.create_task(self.parse(url, i)))
         results = await asyncio.gather(*tasks)
