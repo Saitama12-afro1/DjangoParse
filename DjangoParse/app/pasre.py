@@ -67,7 +67,7 @@ class Parse:
         tasks = []
         pagination = await self.get_pagination()
         for i in range(1, pagination):
-            url = f"https://zakupki.gov.ru/epz/order/extendedsearch/results.html"
+            url = "https://zakupki.gov.ru/epz/order/extendedsearch/results.html"
             tasks.append(asyncio.create_task(self.parse(url, i)))
         results = await asyncio.gather(*tasks)
         return results
